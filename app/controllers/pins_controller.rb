@@ -1,5 +1,6 @@
 class PinsController < ApplicationController
   before_filter :authenticate_user!, except: [:index, :show]
+  before_filter :find_pin, only: [:edit, :update, :destroy, :show]
   # GET /pins
   # GET /pins.json
    def index
@@ -15,8 +16,6 @@ class PinsController < ApplicationController
   # GET /pins/1
   # GET /pins/1.json
   def show
-    @pin = Pin.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @pin }
@@ -36,7 +35,6 @@ class PinsController < ApplicationController
 
   # GET /pins/1/edit
   def edit
-    @pin = current_user.pins.find(params[:id])
   end
 
   # POST /pins
@@ -58,8 +56,6 @@ class PinsController < ApplicationController
   # PUT /pins/1
   # PUT /pins/1.json
   def update
-    @pin = current_user.pins.find(params[:id])
-    @admin = current_user.pins.find(params[:id])
     respond_to do |format|
       if @pin.update_attributes(params[:pin])
         format.html { redirect_to @pin, notice: 'Pin was successfully updated.' }
@@ -74,12 +70,19 @@ class PinsController < ApplicationController
   # DELETE /pins/1
   # DELETE /pins/1.json
   def destroy
-    @pin = current_user.pins.find(params[:id])
     @pin.destroy
 
     respond_to do |format|
       format.html { redirect_to pins_url }
       format.json { head :no_content }
     end
+  end
+
+  private 
+
+  def find_pin
+    @pin = Pin.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      redirect_to root_path
   end
 end
